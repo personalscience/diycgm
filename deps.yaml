@@ -24,6 +24,10 @@ cgmr:
   GithubRepo: cgmr
   GithubRef: HEAD
   GithubSHA1: 1b15acbf084c4029d0cb5a9472cd5dc432d946c8
+config:
+  Package: config
+  Repository: CRAN
+  Version: 0.3.1
 remotes:
   Package: remotes
   Repository: CRAN
@@ -34,10 +38,6 @@ polished:
   GithubRepo: polished
   GithubRef: HEAD
   GithubSHA1: 26179a4dc15ad1429d86fb10b0dd80ed2a26be6b
-config:
-  Package: config
-  Repository: CRAN
-  Version: 0.3.1
 stringr:
   Package: stringr
   Repository: CRAN

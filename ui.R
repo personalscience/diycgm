@@ -46,7 +46,8 @@ ui <-
                               #Application title
                               titlePanel("Personal Science Experiments", windowTitle = "Personal Science, Inc."),
                               tags$a(href="https://personalscience.com", "More details"),
-                              textOutput("about_page")
+                              textOutput("about_page"),
+                              textOutput("currentDB")
                           )
                  )
 

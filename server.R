@@ -18,6 +18,15 @@ server <- function(input, output) {
 
    output$about_page <- renderText("Be Your Own Scientist")
 
+   output$currentDB <- renderText(sprintf("DB=%s. cgmr version = %s, db  = %s",
+                                          attr(config::get(),"config"),
+                                          packageVersion("cgmr"),
+                                          first(tbl(con,"glucose_records") %>%
+                                                  filter(time == max(time, na.rm=TRUE)) %>%
+                                                  pull(time) %>%
+                                                  with_tz(tzone="America/Los_Angeles"))))
+   #
+
    glucose_df <- csv_read_server("fromCSV")
 
 }
