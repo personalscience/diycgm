@@ -24,10 +24,20 @@ cgmr:
   GithubRepo: cgmr
   GithubRef: HEAD
   GithubSHA1: 1b15acbf084c4029d0cb5a9472cd5dc432d946c8
+psiCGM:
+  Package: psiCGM
+  GithubUsername: personalscience
+  GithubRepo: psi-shiny-cgm
+  GithubRef: dev
+  GithubSHA1: da510287ba99f9d4b1144a23877b2c84578abfcc
 config:
   Package: config
   Repository: CRAN
   Version: 0.3.1
+DescTools:
+  Package: DescTools
+  Repository: CRAN
+  Version: 0.99.43
 remotes:
   Package: remotes
   Repository: CRAN
