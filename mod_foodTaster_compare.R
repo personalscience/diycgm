@@ -24,8 +24,7 @@ mod_foodTasterUI <- function(id) {
       downloadButton(ns("downloadFood_df"), label = "Download Results"),
       hr(),
       checkboxGroupInput(ns("meal_items"),label = "Meal", choices = NULL),
-      hr(),
-      textOutput(ns("ranges"))
+      hr()
     ),
     mainPanel(plotOutput(ns("main_plot")),
               h3("Statistics"),
@@ -83,12 +82,6 @@ mod_foodTasterServer <- function(id, title = "Name") {
     }
     )
 
-    # output$ranges ----
-    output$ranges <- renderText(paste0(map_chr(food_df()$user_id %>% unique(),
-                                    function(x) {sprintf("%s =(%s)", username_for_id(x), glucose_range_for_id(x) %>% paste0(collapse=","))
-                                    }
-    )
-    ) %>% paste0(collapse = "\n"))
 
 
     # meals_all ----

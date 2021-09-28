@@ -23,6 +23,7 @@ ui <-
                           )),
                  tabPanel("All Foods",
                           fluidPage(
+                            mod_foodTasterUI("food_compare_plot")
                           )),
                  tabPanel("User View",
                           fluidPage(
