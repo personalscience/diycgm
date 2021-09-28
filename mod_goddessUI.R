@@ -128,6 +128,18 @@ mod_goddessServer <- function(id, title = "Name") {
       }
       )
 
+    # y_scale ----
+
+    y_scale <- reactive({
+      foods_all <-bind_rows(food_df2(),food_df())
+      foods <- if(input$normalize) {foods_all %>% normalize_value()}
+      else foods_all
+      message(sprintf("Max = %d, Min = %d",  min(foods$value), max(foods$value)))
+      list(max = max(foods$value),
+           min = min(foods$value))
+
+    })
+
     # food_df() ----
     food_df <- reactive({
       validate(
@@ -209,7 +221,8 @@ mod_goddessServer <- function(id, title = "Name") {
         labs(title = "Glucose Response", subtitle = str_to_title(isolate(input$food_name1)),
              x = "", y = "")
 
-      gg + if(input$baseline & !input$normalize){
+      gg +
+        ylim(y_scale()[["min"]], y_scale()[["max"]]) + if(input$baseline & !input$normalize){
         geom_rect(aes(xmin = -Inf,
                       xmax = Inf,
                       ymin = gr$mean - gr$sd,
@@ -274,7 +287,8 @@ mod_goddessServer <- function(id, title = "Name") {
         labs(title = "Glucose Response", subtitle = str_to_title(isolate(input$food_name2)),
              x = "", y = "")
 
-      gg + if(input$baseline & !input$normalize){
+      gg +
+        ylim(y_scale()[["min"]], y_scale()[["max"]]) + if(input$baseline & !input$normalize){
         geom_rect(aes(xmin = -Inf,
                       xmax = Inf,
                       ymin = gr$mean - gr$sd,
