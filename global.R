@@ -24,6 +24,6 @@ NOTES_RECORDS <- tbl(con, "notes_records") %>% collect()
 
 source("mod_CSV.R")
 source("psi_plot.R")
-taster_foods <- food_list_db(user_id = c(1001:1004,1007:1021))
+#taster_foods <- food_list_db(user_id = c(1001:1004,1007:1021))
 source("mod_foodTaster_compare.R")
 
