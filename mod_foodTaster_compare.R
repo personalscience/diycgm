@@ -122,7 +122,8 @@ mod_foodTasterServer <- function(id, title = "Name") {
       ggplot(aes(x=t,y=value,color=date_ch))  +
       if(input$smooth) geom_smooth(method = "loess", aes(fill=date_ch)) else geom_line(size=2)
 
-    g + psi_theme +
+    g +
+      #psi_theme +
       geom_rect(aes(xmin=0,
                     xmax=120, #max(Date),
                     ymin=-Inf,
