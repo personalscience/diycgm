@@ -17,11 +17,12 @@ ui <-
 
 
 
-                 tabPanel("Glucose Analysis",
+                 tabPanel("Compare Experiments",
                           fluidPage(
-                              h2("Your CGM Data")
+                              h2("Compare Experiments"),
+                              mod_goddessUI("food2_compare_plot")
                           )),
-                 tabPanel("All Foods",
+                 tabPanel("Compare Foods",
                           fluidPage(
                             mod_foodTasterUI("food_compare_plot")
                           )),

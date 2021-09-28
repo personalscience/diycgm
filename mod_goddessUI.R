@@ -40,8 +40,8 @@ mod_goddessUI <- function(id) {
       selectInput(
         ns("user_id"),
         label = "User Name",
-        choices = with(user_df_from_db(), paste(first_name, str_match(last_name,"[:alnum:]{2}"))),
-        selected = "Richard Sp"
+        choices = user_df_from_db(),
+        selected = 1234
       ),
     uiOutput(ns("food_selection")),
     uiOutput(ns("food_selection2")),
@@ -84,7 +84,7 @@ mod_goddessServer <- function(id, title = "Name") {
   moduleServer(id, function(input, output, session) {
 
     ID<- reactive( {message(paste("Selected User", isolate(input$user_id)))
-      lookup_id_from_name(input$user_id[1])}
+      as.numeric(input$user_id)}
     )
     taster_prod_list <- reactive({
       message(sprintf("seeking prod list for user %d", ID()))
@@ -93,8 +93,8 @@ mod_goddessServer <- function(id, title = "Name") {
 
     output$show_user <- renderText(
 
-     sprintf("user_id = %d, username = %s, product = %s, range=%s", ID(),
-              username_for_id(ID()),
+     sprintf("user_id = %d, product = %s, range=%s", ID(),
+
              input$food_name1,
              paste0(glucose_range_for_id(ID()), collapse=":")
               )
@@ -120,16 +120,7 @@ mod_goddessServer <- function(id, title = "Name") {
       validate(
         need(!is.null(one_food_df), sprintf("No glucose results for food %s", input$food_name1))
       )
-     one_food_df <-  food_times_df(
-        user_id = ID(),
-        timeLength = input$timewindow,
-        prefixLength = input$prefixLength,
-        foodname = input$food_name2
-      )
 
-     validate(
-       need(!is.null(one_food_df), sprintf("No glucose results after eating %s", input$food_name1))
-     )
 
       df <- one_food_df
 
@@ -157,16 +148,7 @@ mod_goddessServer <- function(id, title = "Name") {
       validate(
         need(!is.null(one_food_df), sprintf("No glucose results for food %s", input$food_name1))
       )
-      one_food_df <-  food_times_df(
-        user_id = ID(),
-        timeLength = input$timewindow,
-        prefixLength = input$prefixLength,
-        foodname = input$food_name1
-      )
 
-      validate(
-        need(!is.null(one_food_df), sprintf("No glucose results after eating %s", input$food_name1))
-      )
 
       df <- one_food_df
 
@@ -216,7 +198,8 @@ mod_goddessServer <- function(id, title = "Name") {
       g <- food_df %>% ggplot(aes(x=t,y=value, color = date_ch)) +
         if(input$smooth) geom_smooth(method = "loess", aes(fill = date_ch)) else geom_line(size=2)
 
-      gg <- g + psi_theme +
+      gg <- g +
+        #psi_theme +
         geom_rect(aes(xmin=0,
                       xmax=120, #max(Date),
                       ymin=-Inf,
@@ -280,7 +263,8 @@ mod_goddessServer <- function(id, title = "Name") {
       g <- food_df %>% ggplot(aes(x=t,y=value, color = date_ch)) +
         if(input$smooth) geom_smooth(method = "loess", aes(fill = date_ch)) else geom_line(size=2)
 
-      gg <- g + psi_theme +
+      gg <- g +
+        #psi_theme +
         geom_rect(aes(xmin=0,
                       xmax=120, #max(Date),
                       ymin=-Inf,

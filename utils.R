@@ -36,3 +36,26 @@ food_list_db <- function(user_id = 1234  ) {
   DBI::dbDisconnect(con)
   return(prods)
 }
+
+# psi User Management Functions
+
+#' @title All user records in the database
+#' @param conn_args database connection
+#' @return dataframe of all user records
+#' @export
+user_df_from_db <- function(conn_args = config::get("dataconnection")){
+  con <- DBI::dbConnect(
+    drv = conn_args$driver,
+    user = conn_args$user,
+    host = conn_args$host,
+    port = conn_args$port,
+    dbname = conn_args$dbname,
+    password = conn_args$password
+  )
+
+  users_df <- tbl(con, "user_list" ) %>% collect()
+
+  DBI::dbDisconnect(con)
+  return(users_df)
+
+}
