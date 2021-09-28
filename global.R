@@ -28,3 +28,8 @@ source("mod_goddessUI.R")
 taster_foods <- food_list_db(user_id = c(1001:1004,1007:1021))
 source("mod_foodTaster_compare.R")
 
+psi_theme <-   theme(text = element_text(# family = "Montserrat",
+  face = "bold", size = 15),
+  axis.text.x = element_text(size = 15, angle = 90, hjust = 1),
+  legend.title = element_blank())
+

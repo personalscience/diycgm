@@ -35,7 +35,7 @@ plot_glucose <- function(glucose_raw, title = "Name") {
   auc = auc_calc(g_df,as.numeric(difftime(latest,earliest,units="mins")))
   g = ggplot(data = g_df, aes(x=time, y = value) )
   g +
-    #psi_theme +
+    psi_theme +
     geom_line(color = "red")  +
     labs(title = title, x = "", y = "mg/mL",
          subtitle = paste0("Continuous glucose monitoring",
@@ -68,7 +68,7 @@ plot_food_compare <- function(food_times = food_times_df(foodname = "watermelon"
                               foodname = "watermelon") {
 
   food_times %>% ggplot(aes(t,value, color = meal)) + geom_line(size = 2) +
-    #psi_theme +
+    psi_theme +
     labs(title = paste0("Glucose Response to ",stringr::str_to_title(foodname)),
          subtitle = "",
          x = "Minutes",
