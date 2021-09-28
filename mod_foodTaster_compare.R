@@ -103,13 +103,13 @@ mod_foodTasterServer <- function(id, title = "Name") {
       observe(
         {cat(file = stderr(), sprintf("render plot for food=%s \n",
                                      isolate(input$food_name)))
-        message(sprintf("currently selected choices:%s", input$meal_items))}
+        message(sprintf("currently selected choices:\n%s", paste(isolate(input$meal_items),
+                                                               collapse="\n")))}
       )
 
       food_df <-  if(input$normalize) {food_df() %>% normalize_value()}
       else food_df()
 
-# foods_to_show ----
     foods_to_show <- food_df %>%
       filter(meal %in% input$meal_items)
 
@@ -118,13 +118,13 @@ mod_foodTasterServer <- function(id, title = "Name") {
     )
 
     g <- foods_to_show %>%
-      filter(meal %in% input$meal_items) %>%
+      #filter(meal %in% input$meal_items) %>%
       ggplot(aes(x=t,y=value,color=date_ch))  +
       if(input$smooth) geom_smooth(method = "loess", aes(fill=date_ch)) else geom_line(size=2)
 
     g +
       psi_theme +
-      geom_rect(aes(xmin=0,
+      geom_rect(inherit.aes = FALSE,  aes(xmin=0,
                     xmax=120, #max(Date),
                     ymin=-Inf,
                     ymax=Inf),
@@ -135,10 +135,7 @@ mod_foodTasterServer <- function(id, title = "Name") {
 
     })
 
-    # observeEvent(input$show_raw, {
-    #   updateActionButton(inputId = "show_raw", label = "Hide Raw Data and Stats")
-    # })
-
+    # input$foodname ----
     observeEvent(input$food_name,{
       validate(
         need(input$food_name, "Waiting on database..."),

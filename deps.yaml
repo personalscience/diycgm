@@ -24,6 +24,10 @@ cgmr:
   GithubRepo: cgmr
   GithubRef: HEAD
   GithubSHA1: 1b15acbf084c4029d0cb5a9472cd5dc432d946c8
+bslib:
+  Package: bslib
+  Repository: CRAN
+  Version: 0.3.0
 config:
   Package: config
   Repository: CRAN

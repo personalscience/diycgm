@@ -15,7 +15,7 @@
 ui <-
                   navbarPage("Tastermonial", collapsible = TRUE, inverse = TRUE,
 
-
+                            # theme = bslib::bs_theme(bootswatch = "cerulean"),
 
                  tabPanel("Compare Experiments",
                           fluidPage(
