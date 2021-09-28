@@ -40,7 +40,7 @@ mod_goddessUI <- function(id) {
       selectInput(
         ns("user_id"),
         label = "User Name",
-        choices = user_df_from_db(),
+        choices = user_df_from_db() %>% pull(user_id),
         selected = 1234
       ),
     uiOutput(ns("food_selection")),
