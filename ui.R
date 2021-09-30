@@ -12,7 +12,7 @@
 #' Define UI for application that reads a CSV file
 #' @import shiny
 #' @import magrittr dplyr
-ui <-
+ui <-fluidPage(tags$head(includeScript("google-analytics.html")),
                   navbarPage("Tastermonial", collapsible = TRUE, inverse = TRUE,
 
                             # theme = bslib::bs_theme(bootswatch = "cerulean"),
@@ -53,7 +53,7 @@ ui <-
                           )
                  )
 
-
+)
 )
 
 

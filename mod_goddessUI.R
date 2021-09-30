@@ -225,8 +225,8 @@ mod_goddessServer <- function(id, title = "Name") {
         ylim(y_scale()[["min"]], y_scale()[["max"]]) + if(input$baseline & !input$normalize){
         geom_rect(aes(xmin = -Inf,
                       xmax = Inf,
-                      ymin = gr$mean - gr$sd,
-                      ymax = gr$mean + gr$sd),
+                      ymin = gr$mean - gr$sd*2,
+                      ymax = gr$mean + gr$sd*2),
                   fill = "green",
                   alpha = 0.005,
                   inherit.aes = FALSE)
@@ -283,7 +283,7 @@ mod_goddessServer <- function(id, title = "Name") {
                       ymin=-Inf,
                       ymax=Inf),
                   color = "lightgrey",
-                  alpha=0.005) +
+                  alpha=0.01) +
         labs(title = "Glucose Response", subtitle = str_to_title(isolate(input$food_name2)),
              x = "", y = "")
 
@@ -291,8 +291,8 @@ mod_goddessServer <- function(id, title = "Name") {
         ylim(y_scale()[["min"]], y_scale()[["max"]]) + if(input$baseline & !input$normalize){
         geom_rect(aes(xmin = -Inf,
                       xmax = Inf,
-                      ymin = gr$mean - gr$sd,
-                      ymax = gr$mean + gr$sd),
+                      ymin = gr$mean - gr$sd*2,
+                      ymax = gr$mean + gr$sd*2),
                   fill = "green",
                   alpha = 0.01,
                   inherit.aes = FALSE)
