@@ -23,7 +23,7 @@ cgmr:
   GithubUsername: personalscience
   GithubRepo: cgmr
   GithubRef: HEAD
-  GithubSHA1: 1b15acbf084c4029d0cb5a9472cd5dc432d946c8
+  GithubSHA1: d6761b1c10644b8d5a48d29ffd9a019e38210b35
 config:
   Package: config
   Repository: CRAN

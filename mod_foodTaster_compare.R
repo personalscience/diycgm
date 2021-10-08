@@ -16,10 +16,11 @@ mod_foodTasterUI <- function(id) {
         ns("food_name"),
         label = "Select Food",
         choices = taster_foods,
-        selected = "MOON CHEESE WHITE CHEDDA BLACK PEPPA I OZ OR OZ BAGS"
+        selected = "Clif Bar Chocolate"
       ),
       checkboxInput(ns("normalize"), label = "Normalize"),
       checkboxInput(ns("smooth"), label = "Smooth"),
+      checkboxInput(ns("combine"), label = "Show Average"),
       actionButton(ns("show_raw"), label = "Show Data and Stats"),
       downloadButton(ns("downloadFood_df"), label = "Download Results"),
       hr(),
@@ -63,7 +64,7 @@ mod_foodTasterServer <- function(id, title = "Name") {
         need(input$food_name, "No food selected")
       )
 
-      one_food_df <-  food_times_df_fast(
+      one_food_df <-  cgmr::food_times_df_fast(
         glucose_df = GLUCOSE_RECORDS,
         notes_df = NOTES_RECORDS,
         user_id = NULL,
@@ -76,9 +77,12 @@ mod_foodTasterServer <- function(id, title = "Name") {
         need(!is.null(one_food_df), sprintf("No glucose results for food %s", input$food_name1))
       )
 
-      df <- one_food_df
+      df <-  if(input$normalize) {
+        message(sprintf("normalizing...\n"))
+        one_food_df %>% cgmr::normalize_value()
+      } else one_food_df
 
-      df
+      return(cgmr::combined_food_times_df(df))
     }
     )
 
@@ -107,20 +111,34 @@ mod_foodTasterServer <- function(id, title = "Name") {
                                                                collapse="\n")))}
       )
 
-      food_df <-  if(input$normalize) {food_df() %>% normalize_value()}
-      else food_df()
+      food_df <-  food_df() #if(input$normalize) {food_df() %>% cgmr::normalize_value()}
+      #else food_df()
 
-    foods_to_show <- food_df %>%
-      filter(meal %in% input$meal_items)
+      food_df_ave <- if(input$combine) {message(sprintf("combining...\n"))}
 
-    validate(
-      need(nrow(foods_to_show)>0, "Please select a meal")
-    )
+      foods_to_show <- food_df %>%
+        filter(meal %in% input$meal_items)
 
-    g <- foods_to_show %>%
-      #filter(meal %in% input$meal_items) %>%
-      ggplot(aes(x=t,y=value,color=date_ch))  +
-      if(input$smooth) geom_smooth(method = "loess", aes(fill=date_ch)) else geom_line(size=2)
+      validate(
+        need(nrow(foods_to_show)>0, "Please select a meal")
+      )
+
+      g <- if(input$combine){
+        foods_to_show %>% cgmr::combined_food_times_df() %>%
+          ggplot() +
+          geom_line(aes(x=t,y=value, color = date_ch), size = 1) +
+          geom_smooth(inherit.aes= FALSE,
+                      aes(x=t,y=ave),
+                      method = "loess",
+                      size = 4)
+
+      } else {
+
+        foods_to_show %>%
+          #filter(meal %in% input$meal_items) %>%
+          ggplot(aes(x=t,y=value,color=date_ch))  +
+          if(input$smooth) geom_smooth(method = "loess", aes(fill=date_ch)) else geom_line(size=2)
+      }
 
     g +
       psi_theme +
