@@ -24,7 +24,7 @@ ui <-fluidPage(tags$head(includeScript("google-analytics.html")),
                           )),
                  tabPanel("Compare Foods",
                           fluidPage(
-                            mod_foodTasterUI("food_compare_plot")
+                            mod_food_compare_ui("food_compare_plot")
                           )),
                  tabPanel("User View",
                           fluidPage(

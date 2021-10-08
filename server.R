@@ -28,7 +28,7 @@ server <- function(input, output) {
    #
 
    glucose_df <- csv_read_server("fromCSV")
-   mod_foodTasterServer("food_compare_plot", title = username )
+   mod_food_compare_server("food_compare_plot")
    mod_goddessServer("food2_compare_plot", title = "Tastermonial" )
 
 }
