@@ -28,6 +28,14 @@ config:
   Package: config
   Repository: CRAN
   Version: 0.3.1
+stringr:
+  Package: stringr
+  Repository: CRAN
+  Version: 1.4.0
+readr:
+  Package: readr
+  Repository: CRAN
+  Version: 2.0.1
 DescTools:
   Package: DescTools
   Repository: CRAN
@@ -42,10 +50,6 @@ polished:
   GithubRepo: polished
   GithubRef: HEAD
   GithubSHA1: 26179a4dc15ad1429d86fb10b0dd80ed2a26be6b
-stringr:
-  Package: stringr
-  Repository: CRAN
-  Version: 1.4.0
 dplyr:
   Package: dplyr
   Repository: CRAN
