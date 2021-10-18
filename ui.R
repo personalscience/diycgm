@@ -20,7 +20,7 @@ ui <-fluidPage(tags$head(includeScript("google-analytics.html")),
                  tabPanel("Compare Experiments",
                           fluidPage(
                               h2("Compare Experiments"),
-                              mod_goddessUI("food2_compare_plot")
+                              mod_goddess_ui("food2_compare_plot")
                           )),
                  tabPanel("Compare Foods",
                           fluidPage(

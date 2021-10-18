@@ -1,87 +1,88 @@
-# Shiny Module and UI to compare foods for a single user
-
-glucose_range_for_id <- function(user_id){
-
-  ID = user_id
-  GLUCOSE_RECORDS %>% filter(user_id == ID) %>%
-
-    mutate(time = with_tz(time, tzone="America/Los_Angeles")) %>%
-    filter(hour(time) >=1 & hour(time) <=4 & !is.na(value)) %>%
-    group_by(date=date(time)) %>% summarize(mean = mean(value, na.rm = TRUE)) %>% ungroup() %>%
-    summarize(range = as.integer(range(mean))) %>% pull(range)
-
-}
-
-glucose_ranges_for_id <- function(user_id){
-
-  ID = user_id
-  GLUCOSE_RECORDS %>% filter(user_id == ID) %>%
-
-    mutate(time = with_tz(time, tzone="America/Los_Angeles")) %>%
-    filter(hour(time) >=1 & hour(time) <=4 & !is.na(value)) %>%
-    group_by(date=date(time)) %>% summarize(mean = mean(value, na.rm = TRUE), sd = sd(value,na.rm = TRUE)) %>% ungroup() %>%
-    select(mean,sd) %>% summarize(mean=mean(mean),sd=mean(sd))
-
-
-}
-
-
-#' @title UI for comparing food for a single user
-#' @description
-#' Plot glucose responses for a foods for a single user.
-#' @param id Shiny id
-#' @export
-mod_goddessUI <- function(id) {
+#' goddess UI Function
+#'
+#' @description A shiny Module.
+#'
+#' @param id,input,output,session Internal parameters for {shiny}.
+#'
+#' @noRd
+#'
+#' @importFrom shiny NS tagList
+#' @importFrom dplyr pull %>%
+mod_goddess_ui <- function(id){
   ns <- NS(id)
+  tagList(
 
-
-  sidebarLayout(
-    sidebarPanel(
-      selectInput(
-        ns("user_id"),
-        label = "User Name",
-        choices = user_df_from_db() %>% pull(user_id),
-        selected = 1234
+    sidebarLayout(
+      sidebarPanel(
+        selectInput(
+          ns("user_id"),
+          label = "User Name",
+          choices = user_df_from_db() %>% pull(user_id),
+          selected = 1234
+        ),
+        uiOutput(ns("food_selection")),
+        uiOutput(ns("food_selection2")),
+        checkboxInput(ns("normalize"), label = "Normalize"),
+        checkboxInput(ns("smooth"), label = "Smooth"),
+        checkboxInput(ns("baseline"), label = "Show Baseline"),
+        numericInput(ns("prefixLength"), label = "Prefix Minutes", value = 0, width = "30%" ),
+        numericInput(ns("timewindow"), label = "Time Window (Minutes)", value = 150, width = "30%"),
+        actionButton(ns("show_raw"), label = "Show Raw Data"),
+        actionButton(ns("submit_foods"), label = "Calculate Stats"),
+        downloadButton(ns("downloadFood_df"), label = "Download Results"),
       ),
-    uiOutput(ns("food_selection")),
-    uiOutput(ns("food_selection2")),
-    checkboxInput(ns("normalize"), label = "Normalize"),
-    checkboxInput(ns("smooth"), label = "Smooth"),
-    checkboxInput(ns("baseline"), label = "Show Baseline"),
-    numericInput(ns("prefixLength"), label = "Prefix Minutes", value = 0, width = "30%" ),
-    numericInput(ns("timewindow"), label = "Time Window (Minutes)", value = 150, width = "30%"),
-    actionButton(ns("show_raw"), label = "Show Raw Data"),
-    actionButton(ns("submit_foods"), label = "Calculate Stats"),
-    downloadButton(ns("downloadFood_df"), label = "Download Results"),
-    ),
-    mainPanel(
+      mainPanel(
 
-      plotOutput(ns("food1")),
-      plotOutput(ns("food2")),
-      h3("Stats Table"),
-      dataTableOutput(ns("auc_table")),
-      h3("Raw Data"),
-      dataTableOutput(ns("raw_data_table")),
-      hr(),
-      textOutput(ns('show_user'))
+        plotOutput(ns("food1")),
+        plotOutput(ns("food2")),
+        h3("Stats Table"),
+        dataTableOutput(ns("auc_table")),
+        h3("Raw Data"),
+        dataTableOutput(ns("raw_data_table")),
+        hr(),
+        textOutput(ns('show_user'))
       )
     )
 
+  )
 }
 
+#' goddess Server Functions
+#' @import dplyr
+#' @import ggplot2
+#' @importFrom magrittr %>%
+#' @noRd
+mod_goddess_server <- function(id){
+  moduleServer( id, function(input, output, session){
+    ns <- session$ns
+    conn_args <-  config::get("dataconnection")
+    con <- DBI::dbConnect(
+      drv = conn_args$driver,
+      user = conn_args$user,
+      host = conn_args$host,
+      port = conn_args$port,
+      dbname = conn_args$dbname,
+      password = conn_args$password)
 
-#' @title Shiny server to display two food comparisons for one user.
-#' @description
-#' Given a (reactive) libreview dataframe, this Shiny module will
-#' generate a valid ggplot object and display it in an accompanying UI
-#' @param id shiny module id
-#' @param glucose_df reactive for a valid glucose dataframe
-#' @param title a title for the plot
-#' @return ggplot object representing a glucose chart
-#' @export
-mod_goddessServer <- function(id, title = "Name") {
+    GLUCOSE_RECORDS<- tbl(con,"glucose_records") %>% collect()
+    NOTES_RECORDS <- tbl(con, "notes_records") %>% collect()
 
-  moduleServer(id, function(input, output, session) {
+    glucose_ranges_for_id <- function(user_id){
+
+      ID = user_id
+      GLUCOSE_RECORDS %>% filter(user_id == ID) %>%
+
+        mutate(time = lubridate::with_tz(time, tzone="America/Los_Angeles")) %>%
+        filter(lubridate::hour(time) >=1 & lubridate::hour(time) <=4 & !is.na(value)) %>%
+        group_by(date=lubridate::date(time)) %>%
+        summarize(mean = mean(value, na.rm = TRUE), sd = sd(value,na.rm = TRUE)) %>%
+        ungroup() %>%
+        select(mean,sd) %>%
+        summarize(mean=mean(mean),sd=mean(sd))
+
+
+    }
+
 
     ID<- reactive( {message(paste("Selected User", isolate(input$user_id)))
       as.numeric(input$user_id)}
@@ -89,18 +90,18 @@ mod_goddessServer <- function(id, title = "Name") {
     taster_prod_list <- reactive({
       message(sprintf("seeking prod list for user %d", ID()))
       food_list_db(user_id = ID())}
-      )
+    )
 
     output$show_user <- renderText(
 
-     sprintf("user_id = %d, product = %s, range=%s", ID(),
+      sprintf("user_id = %d, product = %s, range=%s", ID(),
 
-             input$food_name1,
-             paste0(glucose_range_for_id(ID()), collapse=":")
-              )
+              input$food_name1,
+              paste0(glucose_ranges_for_id(ID()), collapse=" : ")
       )
+    )
 
-# food_df2() ----
+    # food_df2() ----
     food_df2 <- reactive({
       validate(
         need(!is.null(taster_prod_list()),"No food times available for this person"),
@@ -108,7 +109,7 @@ mod_goddessServer <- function(id, title = "Name") {
         need(input$food_name1, "No food selected")
       )
 
-      one_food_df <-  food_times_df_fast(
+      one_food_df <-  cgmr::food_times_df_fast(
         glucose_df = GLUCOSE_RECORDS,
         notes_df = NOTES_RECORDS,
         user_id = ID(),
@@ -125,14 +126,14 @@ mod_goddessServer <- function(id, title = "Name") {
       df <- one_food_df
 
       df
-      }
-      )
+    }
+    )
 
     # y_scale ----
 
     y_scale <- reactive({
       foods_all <-bind_rows(food_df2(),food_df())
-      foods <- if(input$normalize) {foods_all %>% normalize_value()}
+      foods <- if(input$normalize) {foods_all %>% cgmr::normalize_value()}
       else foods_all
       message(sprintf("Max = %d, Min = %d",  min(foods$value), max(foods$value)))
       list(max = max(foods$value),
@@ -140,15 +141,15 @@ mod_goddessServer <- function(id, title = "Name") {
 
     })
 
-    # food_df() ----
+    # food_df ----
     food_df <- reactive({
       validate(
-        need(!is.null(taster_prod_list()),"No food times available for this person"),
+        need(!is.null(taster_prod_list()), "No food times available for this person"),
         need(!is.null(ID()), "No user selected"),
         need(input$food_name1, "No food selected")
       )
 
-      one_food_df <-  food_times_df_fast(
+      one_food_df <-  cgmr::food_times_df_fast(
         glucose_df = GLUCOSE_RECORDS,
         notes_df = NOTES_RECORDS,
         user_id = ID(),
@@ -161,13 +162,15 @@ mod_goddessServer <- function(id, title = "Name") {
         need(!is.null(one_food_df), sprintf("No glucose results for food %s", input$food_name1))
       )
 
+      df <-  if(input$normalize) {
+        message(sprintf("normalizing...\n"))
+        one_food_df %>% cgmr::normalize_value()
+      } else one_food_df
 
-      df <- one_food_df
-
-      df
+      return(cgmr::combined_food_times_df(df))
     }
     )
-# output$food_selection ----
+    # output$food_selection ----
     output$food_selection <- renderUI({
       validate(
         need(!is.null(taster_prod_list()),sprintf("No foods available for user_id %s",ID()))
@@ -202,36 +205,29 @@ mod_goddessServer <- function(id, title = "Name") {
 
 
 
-      food_df <-  if(input$normalize) {food_df() %>% normalize_value()}
+      food_df <-  if(input$normalize) {food_df() %>% cgmr::normalize_value()}
       else food_df()
 
 
       gr <- glucose_ranges_for_id(ID())
-      g <- food_df %>% ggplot(aes(x=t,y=value, color = date_ch)) +
-        if(input$smooth) geom_smooth(method = "loess", aes(fill = date_ch)) else geom_line(size=2)
 
-      gg <- g +
-        psi_theme() +
-        geom_rect(aes(xmin=0,
-                      xmax=120, #max(Date),
-                      ymin=-Inf,
-                      ymax=Inf),
-                  color = "lightgrey",
-                  alpha=0.005) +
-        labs(title = "Glucose Response", subtitle = str_to_title(isolate(input$food_name1)),
-             x = "", y = "")
+      g <- plot_compare_glucose(food_df,
+                                combine = FALSE, #input$combine,
+                                smooth = input$smooth,
+                                title = "Glucose Response",
+                                subtitle = sprintf("Food = %s", isolate(input$food_name1)))
 
-      gg +
+      g +
         ylim(y_scale()[["min"]], y_scale()[["max"]]) + if(input$baseline & !input$normalize){
-        geom_rect(aes(xmin = -Inf,
-                      xmax = Inf,
-                      ymin = gr$mean - gr$sd*2,
-                      ymax = gr$mean + gr$sd*2),
-                  fill = "green",
-                  alpha = 0.005,
-                  inherit.aes = FALSE)
-      }
-  })
+          annotate("rect",
+                   xmin = -Inf,
+                   xmax = Inf,
+                   ymin = gr$mean - gr$sd*2,
+                   ymax = gr$mean + gr$sd*2,
+                   fill = "green",
+                   alpha = 0.3)
+        }
+    })
 
     # output$food_selection2 ----
     output$food_selection2 <- renderUI({
@@ -268,35 +264,27 @@ mod_goddessServer <- function(id, title = "Name") {
 
 
 
-      food_df <-  if(input$normalize) {food_df2() %>% normalize_value()}
+      food_df <-  if(input$normalize) {food_df2() %>% cgmr::normalize_value()}
       else food_df2()
 
       gr <- glucose_ranges_for_id(ID())
 
-      g <- food_df %>% ggplot(aes(x=t,y=value, color = date_ch)) +
-        if(input$smooth) geom_smooth(method = "loess", aes(fill = date_ch)) else geom_line(size=2)
+      g <- plot_compare_glucose(food_df,
+                                combine = FALSE, #input$combine,
+                                smooth = input$smooth,
+                                title = "Glucose Response",
+                                subtitle = sprintf("Food = %s", isolate(input$food_name2)))
 
-      gg <- g +
-        psi_theme() +
-        geom_rect(aes(xmin=0,
-                      xmax=120, #max(Date),
-                      ymin=-Inf,
-                      ymax=Inf),
-                  color = "lightgrey",
-                  alpha=0.01) +
-        labs(title = "Glucose Response", subtitle = str_to_title(isolate(input$food_name2)),
-             x = "", y = "")
-
-      gg +
+      g +
         ylim(y_scale()[["min"]], y_scale()[["max"]]) + if(input$baseline & !input$normalize){
-        geom_rect(aes(xmin = -Inf,
-                      xmax = Inf,
-                      ymin = gr$mean - gr$sd*2,
-                      ymax = gr$mean + gr$sd*2),
-                  fill = "green",
-                  alpha = 0.01,
-                  inherit.aes = FALSE)
-      }
+          annotate("rect",
+                   xmin = -Inf,
+                   xmax = Inf,
+                   ymin = gr$mean - gr$sd*2,
+                   ymax = gr$mean + gr$sd*2,
+                   fill = "green",
+                   alpha = 0.3)
+        }
     })
 
     # output$auc_table ----
@@ -311,7 +299,7 @@ mod_goddessServer <- function(id, title = "Name") {
         group_by(meal) %>% arrange(t) %>%
         summarize(
 
-          iAUC = auc_calc(tibble(time=t,value=value)),
+          iAUC = cgmr::auc_calc(tibble(time=t,value=value)),
           auc_total = DescTools::AUC(t,value-first(value)),
 
           min = min(value),
@@ -331,7 +319,7 @@ mod_goddessServer <- function(id, title = "Name") {
         need(input$show_raw, "Press Show Raw")
       )
       bind_rows(food_df(),food_df2()) %>%
-        mutate(timestamp = with_tz(timestamp, tzone = "America/Los_Angeles")) %>%
+        mutate(timestamp = lubridate::with_tz(timestamp, tzone = "America/Los_Angeles")) %>%
         distinct() %>% arrange(meal)
 
     })
@@ -342,25 +330,32 @@ mod_goddessServer <- function(id, title = "Name") {
           sprintf("Food_data-%s-%s.csv", ID(), Sys.Date())
         },
         content = function(file) {
-          write_csv(bind_rows(food_df(),food_df2()) %>% distinct() %>% arrange(meal), file)
+          readr::write_csv(bind_rows(food_df(),food_df2()) %>% distinct() %>% arrange(meal), file)
         }
       )
 
-  })
 
+  })
 }
 
+## To be copied in the UI
+# mod_goddess_ui("goddess_ui_1")
 
+## To be copied in the server
+# mod_goddess_server("goddess_ui_1")
 
-demo_food2 <- function(){
-
-
-  ui <- fluidPage(mod_goddessUI("x"))
+#' @description Demo for mod_food_compare
+#' @noRd
+#'
+demo_goddess <- function() {
+  ui <- fluidPage(mod_goddess_ui("x"))
+  sample_glucose <- cgmr::glucose_df_from_libreview_csv()
   server <- function(input, output, session) {
-    mod_goddessServer("x", reactiveVal("Username"))
+    mod_goddess_server("x")
+
   }
   shinyApp(ui, server)
-
 }
 
-if(interactive()) demo_food2()
+
+
