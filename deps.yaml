@@ -1,7 +1,7 @@
 shiny:
   Package: shiny
   Repository: CRAN
-  Version: 1.7.0
+  Version: 1.7.1
 tidyverse:
   Package: tidyverse
   Repository: CRAN
@@ -9,7 +9,7 @@ tidyverse:
 lubridate:
   Package: lubridate
   Repository: CRAN
-  Version: 1.7.10
+  Version: 1.8.0
 DBI:
   Package: DBI
   Repository: CRAN
@@ -17,7 +17,7 @@ DBI:
 RPostgres:
   Package: RPostgres
   Repository: CRAN
-  Version: 1.3.3
+  Version: 1.4.1
 cgmr:
   Package: cgmr
   GithubUsername: personalscience
@@ -35,7 +35,7 @@ stringr:
 readr:
   Package: readr
   Repository: CRAN
-  Version: 2.0.1
+  Version: 2.0.2
 DescTools:
   Package: DescTools
   Repository: CRAN
@@ -43,13 +43,11 @@ DescTools:
 remotes:
   Package: remotes
   Repository: CRAN
-  Version: 2.4.0
+  Version: 2.4.1
 polished:
   Package: polished
-  GithubUsername: tychobra
-  GithubRepo: polished
-  GithubRef: HEAD
-  GithubSHA1: 26179a4dc15ad1429d86fb10b0dd80ed2a26be6b
+  Repository: CRAN
+  Version: 0.4.0
 dplyr:
   Package: dplyr
   Repository: CRAN
