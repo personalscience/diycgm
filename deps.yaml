@@ -28,10 +28,6 @@ config:
   Package: config
   Repository: CRAN
   Version: 0.3.1
-stringr:
-  Package: stringr
-  Repository: CRAN
-  Version: 1.4.0
 readr:
   Package: readr
   Repository: CRAN

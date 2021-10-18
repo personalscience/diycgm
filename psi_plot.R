@@ -55,12 +55,12 @@ plot_compare_glucose <- function(food_times_df, combine = FALSE, smooth = FALSE,
 
     foods_to_show %>%
       ggplot(aes(x=`t`,y=`value`,color=`date_ch`))  +
+      geom_point( size = 3) +
       if(smooth) geom_smooth(method = "loess", aes(fill=`date_ch`)) else geom_line(size=2)
   }
 
   g +
     psi_theme() +
-    geom_point( size = 3) +
     annotate(geom="rect",  # draw a light box around the portion of the graph during "expected experiment time"
              xmin=0,
              xmax=120, # we typical measure two hours out

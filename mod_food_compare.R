@@ -59,8 +59,6 @@ mod_food_compare_server <- function(id){
     GLUCOSE_RECORDS<- tbl(con,"glucose_records") %>% collect()
     NOTES_RECORDS <- tbl(con, "notes_records") %>% collect()
 
-
-
     # food_df ----
     food_df <- reactive({
       validate(
@@ -80,12 +78,12 @@ mod_food_compare_server <- function(id){
         need(!is.null(one_food_df), sprintf("No glucose results for food %s", input$food_name1))
       )
 
-   df <-  if(input$normalize) {
-      message(sprintf("normalizing...\n"))
-      one_food_df %>% cgmr::normalize_value()
-    } else one_food_df
+      df <-  if(input$normalize) {
+        message(sprintf("normalizing...\n"))
+        one_food_df %>% cgmr::normalize_value()
+      } else one_food_df
 
-    return(cgmr::combined_food_times_df(df))
+      return(cgmr::combined_food_times_df(df))
     }
     )
 
@@ -117,10 +115,7 @@ mod_food_compare_server <- function(id){
                                                                    collapse="\n")))}
       )
 
-      food_df <-  food_df() #if(input$normalize) {food_df() %>% cgmr::normalize_value()}
-      #else food_df()
-
-      food_df_ave <- if(input$combine) {message(sprintf("combining...\n"))}
+      food_df <-  food_df()
 
       foods_to_show <- food_df %>%
         filter(meal %in% input$meal_items)
@@ -129,34 +124,13 @@ mod_food_compare_server <- function(id){
         need(nrow(foods_to_show)>0, "Please select a meal")
       )
 
-      g <- if(input$combine){
-        foods_to_show %>% cgmr::combined_food_times_df() %>%
-        ggplot() +
-          geom_line(aes(x=t,y=value, color = date_ch), size = 1) +
-          geom_smooth(inherit.aes= FALSE,
-                      aes(x=t,y=ave),
-                      method = "loess",
-                      size = 4)
+      g <- plot_compare_glucose(foods_to_show,
+                                input$combine,
+                                input$smooth,
+                                title = "Glucose Response",
+                                subtitle = sprintf("Food = %s", isolate(input$food_name)))
 
-      } else {
-
-        foods_to_show %>%
-        #filter(meal %in% input$meal_items) %>%
-        ggplot(aes(x=t,y=value,color=date_ch))  +
-        if(input$smooth) geom_smooth(method = "loess", aes(fill=date_ch)) else geom_line(size=2)
-      }
-
-      g +
-        psi_theme() +
-        annotate(geom="rect",  # draw a light box around the portion of the graph during "expected experiment time"
-                 xmin=0,
-                 xmax=120, # we typical measure two hours out
-                 ymin=-Inf,
-                 ymax=Inf,
-                  color = "lightgrey",
-                  alpha=0.2) +
-        labs(title = "Glucose Response", subtitle = stringr::str_to_title(isolate(input$food_name)),
-             x = "minutes", y = "")
+      return(g)
 
     })
 
@@ -234,5 +208,3 @@ demo_food <- function() {
   }
   shinyApp(ui, server)
 }
-
-
