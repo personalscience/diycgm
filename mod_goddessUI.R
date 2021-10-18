@@ -211,7 +211,7 @@ mod_goddessServer <- function(id, title = "Name") {
         if(input$smooth) geom_smooth(method = "loess", aes(fill = date_ch)) else geom_line(size=2)
 
       gg <- g +
-        psi_theme +
+        psi_theme() +
         geom_rect(aes(xmin=0,
                       xmax=120, #max(Date),
                       ymin=-Inf,
@@ -277,7 +277,7 @@ mod_goddessServer <- function(id, title = "Name") {
         if(input$smooth) geom_smooth(method = "loess", aes(fill = date_ch)) else geom_line(size=2)
 
       gg <- g +
-        psi_theme +
+        psi_theme() +
         geom_rect(aes(xmin=0,
                       xmax=120, #max(Date),
                       ymin=-Inf,

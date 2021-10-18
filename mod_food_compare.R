@@ -58,10 +58,7 @@ mod_food_compare_server <- function(id){
 
     GLUCOSE_RECORDS<- tbl(con,"glucose_records") %>% collect()
     NOTES_RECORDS <- tbl(con, "notes_records") %>% collect()
-    psi_theme <-   theme(text = element_text(# family = "Montserrat",
-      face = "bold", size = 15),
-      axis.text.x = element_text(size = 15, angle = 90, hjust = 1),
-      legend.title = element_blank())
+
 
 
     # food_df ----
@@ -150,7 +147,7 @@ mod_food_compare_server <- function(id){
       }
 
       g +
-        psi_theme +
+        psi_theme() +
         annotate(geom="rect",  # draw a light box around the portion of the graph during "expected experiment time"
                  xmin=0,
                  xmax=120, # we typical measure two hours out
