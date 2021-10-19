@@ -28,6 +28,7 @@ server <- function(input, output) {
    #
 
    glucose_df <- csv_read_server("fromCSV")
+   mod_user_view_server("user_view_ui_1")
    mod_food_compare_server("food_compare_plot")
    mod_goddess_server("food2_compare_plot")
 

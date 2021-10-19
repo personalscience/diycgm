@@ -28,14 +28,7 @@ ui <-fluidPage(tags$head(includeScript("google-analytics.html")),
                           )),
                  tabPanel("User View",
                           fluidPage(
-                              sidebarLayout(
-                                  sidebarPanel(
-
-                                  ),
-
-                                  mainPanel(
-
-                                  ))
+                            mod_user_view_ui("user_view_ui_1")
                           )),
 
                  tabPanel("CSV Load",
