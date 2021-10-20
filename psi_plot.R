@@ -59,7 +59,7 @@ plot_compare_glucose <- function(food_times_df, combine = FALSE, smooth = FALSE,
       if(smooth) geom_smooth(method = "loess", aes(fill=`date_ch`)) else geom_line(size=2)
   }
 
-  g +
+  gp <- g +
     psi_theme() +
     annotate(geom="rect",  # draw a light box around the portion of the graph during "expected experiment time"
              xmin=0,
@@ -70,6 +70,9 @@ plot_compare_glucose <- function(food_times_df, combine = FALSE, smooth = FALSE,
              alpha=0.2) +
     labs(title = title, subtitle = subtitle,
          x = "minutes", y = "mg/dL")
+
+  return(gp)
+
 }
 
 #' @title Plot a glucose dataframe
@@ -77,7 +80,7 @@ plot_compare_glucose <- function(food_times_df, combine = FALSE, smooth = FALSE,
 #' @param glucose_raw dataframe of a valid CGM data stream
 #' @param title string to display on ggplot
 #' @import dplyr
-#' @import ggplot2
+#' @import ggplot2 plotly
 #' @export
 #' @return ggplot object
 plot_glucose <- function(glucose_raw, title = "Name", subtitle = "") {
@@ -92,7 +95,7 @@ plot_glucose <- function(glucose_raw, title = "Name", subtitle = "") {
 
   #auc = cgmr::auc_calc(g_df,as.numeric(difftime(latest,earliest,units="mins")))
   g = ggplot(data = g_df, aes(x=time, y = value) )
-  g +
+  gp <- g +
     psi_theme() +
     geom_line(color = "red")  +
     geom_point(size = 2) +
@@ -101,6 +104,8 @@ plot_glucose <- function(glucose_raw, title = "Name", subtitle = "") {
     scaled_axis(g_df) +
     #scale_x_datetime(date_breaks = "1 day", date_labels = "%a %b-%d") +
     coord_cartesian(ylim = c(lowest, highest))
+
+  return(plotly::ggplotly(gp))
 }
 
 #' Adjust x axis depending on time scale of glucose data frame

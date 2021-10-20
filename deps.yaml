@@ -28,6 +28,10 @@ config:
   Package: config
   Repository: CRAN
   Version: 0.3.1
+plotly:
+  Package: plotly
+  Repository: CRAN
+  Version: 4.10.0
 readr:
   Package: readr
   Repository: CRAN

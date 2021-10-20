@@ -33,8 +33,8 @@ mod_goddess_ui <- function(id){
       ),
       mainPanel(
 
-        plotOutput(ns("food1")),
-        plotOutput(ns("food2")),
+        plotly::plotlyOutput(ns("food1")),
+        plotly::plotlyOutput(ns("food2")),
         h3("Stats Table"),
         dataTableOutput(ns("auc_table")),
         h3("Raw Data"),
@@ -190,7 +190,7 @@ mod_goddess_server <- function(id){
     )
 
     # output$food1 Render Plot----
-    output$food1 <- renderPlot({
+    output$food1 <- plotly::renderPlotly({
 
       validate(
         need(input$food_name1, "Waiting on database...1"),
@@ -217,7 +217,7 @@ mod_goddess_server <- function(id){
                                 title = "Glucose Response",
                                 subtitle = sprintf("Food = %s", isolate(input$food_name1)))
 
-      g +
+      gp <- g +
         ylim(y_scale()[["min"]], y_scale()[["max"]]) + if(input$baseline & !input$normalize){
           annotate("rect",
                    xmin = -Inf,
@@ -227,6 +227,9 @@ mod_goddess_server <- function(id){
                    fill = "green",
                    alpha = 0.3)
         }
+      return(plotly::ggplotly(gp)  %>% plotly::layout(title = list( text = sprintf("%s<br><sup>Food=%s</sup>",
+                                                                                   "Glucose Response",
+                                                                                   isolate(input$food_name2)))))
     })
 
     # output$food_selection2 ----
@@ -249,7 +252,7 @@ mod_goddess_server <- function(id){
     )
 
     # output$food2 Render Plot ----
-    output$food2 <- renderPlot({
+    output$food2 <- plotly::renderPlotly({
 
       validate(
         need(input$food_name1, "Waiting on database...1"),
@@ -275,7 +278,7 @@ mod_goddess_server <- function(id){
                                 title = "Glucose Response",
                                 subtitle = sprintf("Food = %s", isolate(input$food_name2)))
 
-      g +
+      gp <- g +
         ylim(y_scale()[["min"]], y_scale()[["max"]]) + if(input$baseline & !input$normalize){
           annotate("rect",
                    xmin = -Inf,
@@ -285,6 +288,9 @@ mod_goddess_server <- function(id){
                    fill = "green",
                    alpha = 0.3)
         }
+      return(plotly::ggplotly(gp)  %>% plotly::layout(title = list( text = sprintf("%s<br><sup>Food=%s</sup>",
+                                                                                   "Glucose Response",
+                                                                                   isolate(input$food_name2)))))
     })
 
     # output$auc_table ----

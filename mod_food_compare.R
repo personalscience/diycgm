@@ -27,7 +27,7 @@ mod_food_compare_ui <- function(id){
         checkboxGroupInput(ns("meal_items"),label = "Meal", choices = NULL),
         hr()
       ),
-      mainPanel(plotOutput(ns("main_plot")),
+      mainPanel(plotly::plotlyOutput(ns("main_plot")),
                 h3("Statistics"),
                 wellPanel(dataTableOutput(ns("auc_table"))),
                 hr(),
@@ -102,7 +102,7 @@ mod_food_compare_server <- function(id){
     )
 
     # output$main_plot  ----
-    output$main_plot <- renderPlot({
+    output$main_plot <- plotly::renderPlotly({
 
       validate(
         need(input$food_name, "Waiting on database..."),
@@ -130,7 +130,9 @@ mod_food_compare_server <- function(id){
                                 title = "Glucose Response",
                                 subtitle = sprintf("Food = %s", isolate(input$food_name)))
 
-      return(g)
+      return(plotly::ggplotly(g)  %>% plotly::layout(title = list( text = sprintf("%s<br><sup>Food=%s</sup>",
+                                                                                  "Glucose Response",
+                                                                                  isolate(input$food_name)))))
 
     })
 

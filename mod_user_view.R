@@ -31,7 +31,7 @@ mod_user_view_ui <- function(id){
       ),
       mainPanel(
 
-        plotOutput(ns("glucose_plot")),
+        plotly::plotlyOutput(ns("glucose_plot")),
         h3("Stats Table"),
         dataTableOutput(ns("auc_table")),
         h3("Raw Data"),
@@ -137,7 +137,7 @@ mod_user_view_server <- function(id){
     # output$glucose_plot----
 
 
-      output$glucose_plot <- renderPlot({
+    output$glucose_plot <- plotly::renderPlotly({
 
         validate(
           need(input$food_name, "Waiting on database...1"),
